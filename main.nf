@@ -17,8 +17,6 @@ process STAR {
     """#!/bin/bash
 set -e
 
-mkdir tmp
-
 STAR --genomeDir ${genomeDir} \
      --readFilesIn ${R1} ${R2} \
      --readFilesCommand zcat \
@@ -28,8 +26,6 @@ STAR --genomeDir ${genomeDir} \
      --outTmpDir tmp \
      --outFileNamePrefix "${sample}"
 
-rm -r tmp
-    
     """
 }
 
@@ -46,8 +42,6 @@ process arcasHLA {
     """#!/bin/bash
 set -e
 
-mkdir tmp
-
 arcasHLA extract \
     --threads ${task.cpus} \
     --paired \
@@ -63,8 +57,6 @@ arcasHLA genotype \
     --verbose \
     --temp tmp \
     "hla/${sample}.Aligned.sortedByCoord.out.extracted.1.fq.gz" "hla/${sample}.Aligned.sortedByCoord.out.extracted.2.fq.gz"
-
-rm -r tmp
 """
 }
 
