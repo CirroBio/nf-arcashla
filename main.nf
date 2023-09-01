@@ -44,7 +44,6 @@ set -e
 
 arcasHLA extract \
     --threads ${task.cpus} \
-    --paired \
     --outdir hla \
     --verbose \
     --temp tmp \
