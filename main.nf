@@ -24,7 +24,7 @@ STAR --genomeDir ${genomeDir} \
      --quantMode GeneCounts \
      --runThreadN ${task.cpus} \
      --outTmpDir tmp \
-     --outFileNamePrefix "${sample}"
+     --outFileNamePrefix "${sample}."
 
     """
 }
@@ -48,6 +48,12 @@ arcasHLA extract \
     --verbose \
     --temp tmp \
     "${bam}"
+
+for NUM in 1 2; do
+    if [ ! -s "hla/${sample}.Aligned.sortedByCoord.out.extracted.\$NUM.fq.gz" ]; then
+        gzip "hla/${sample}.Aligned.sortedByCoord.out.extracted.\$NUM.fq"
+    fi
+done
 
 arcasHLA genotype \
     --genes ${params.genes} \
