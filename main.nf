@@ -59,6 +59,9 @@ done
 # Required to install the database
 git lfs install
 
+# Set up the reference database
+arcasHLA reference --version "${params.database}"
+
 arcasHLA genotype \
     --genes ${params.genes} \
     --population "${params.population}" \
@@ -68,7 +71,6 @@ arcasHLA genotype \
     --threads ${task.cpus} \
     --verbose \
     --temp tmp \
-    -d ${params.database} \
     --log "hla/${sample}.log" \
     "hla/${sample}.Aligned.sortedByCoord.out.extracted.1.fq.gz" "hla/${sample}.Aligned.sortedByCoord.out.extracted.2.fq.gz"
 """
