@@ -60,6 +60,9 @@ git lfs install
 
 arcasHLA genotype \
     --genes ${params.genes} \
+    --population "${params.population}" \
+    --zygosity_threshold "${params.zygosity_threshold}" \
+    --min_count "${params.min_count}" \
     --outdir hla \
     --threads ${task.cpus} \
     --verbose \
