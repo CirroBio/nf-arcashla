@@ -37,6 +37,7 @@ process arcasHLA {
     tuple val(sample), path(bam)
 
     output:
+    path "hla/*.genotype.json", emit: json
     path "hla/"
 
     """#!/bin/bash
@@ -73,6 +74,23 @@ arcasHLA genotype \
 """
 }
 
+process merge {
+    container "${params.container__arcashla}"
+    publishDir "${params.outdir}/", mode: 'copy', overwrite: true
+
+    input:
+    path "*"
+
+    output:
+    path "*"
+
+    """#!/bin/bash
+set -e
+
+arcasHLA merge
+"""
+}
+
 workflow {
     // Parse the input files from the samplesheet
     Channel
@@ -94,4 +112,6 @@ workflow {
     STAR(inputs, genomeDir)
 
     arcasHLA(STAR.out)
+
+    merge(arcasHLA.out.json.toSortedList())
 }
