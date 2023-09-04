@@ -55,12 +55,17 @@ for NUM in 1 2; do
     fi
 done
 
+# Required to install the database
+git lfs install
+
 arcasHLA genotype \
     --genes ${params.genes} \
     --outdir hla \
     --threads ${task.cpus} \
     --verbose \
     --temp tmp \
+    -d ${params.database} \
+    --log "hla/${sample}.log" \
     "hla/${sample}.Aligned.sortedByCoord.out.extracted.1.fq.gz" "hla/${sample}.Aligned.sortedByCoord.out.extracted.2.fq.gz"
 """
 }
