@@ -50,9 +50,11 @@ arcasHLA extract \
     --temp tmp \
     "${bam}"
 
+ls -lahtr
+
 for NUM in 1 2; do
-    if [ ! -s "hla/${sample}.Aligned.sortedByCoord.out.extracted.\$NUM.fq.gz" ]; then
-        gzip "hla/${sample}.Aligned.sortedByCoord.out.extracted.\$NUM.fq"
+    if [ ! -s "hla/${bam.replaceAll(/.bam/, '')}.extracted.\$NUM.fq.gz" ]; then
+        gzip "hla/${bam.replaceAll(/.bam/, '')}.extracted.\$NUM.fq"
     fi
 done
 
@@ -72,7 +74,7 @@ arcasHLA genotype \
     --verbose \
     --temp tmp \
     --log "hla/${sample}.log" \
-    "hla/${sample}.Aligned.sortedByCoord.out.extracted.1.fq.gz" "hla/${sample}.Aligned.sortedByCoord.out.extracted.2.fq.gz"
+    "hla/${bam.replaceAll(/.bam/, '')}.extracted.1.fq.gz" "hla/${bam.replaceAll(/.bam/, '')}.extracted.2.fq.gz"
 """
 }
 
