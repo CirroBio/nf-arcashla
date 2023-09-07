@@ -102,18 +102,34 @@ workflow {
         )
         .splitCsv(header: true)
         .flatten()
+        .branch {
+            fastq: file(it.fastq_1).exists()
+            bam: true
+        }
+        .set { inputs }
+
+    inputs
+        .fastq
         .map {row -> [
             row.sample,
             file(row.fastq_1, checkIfExists: true),
             file(row.fastq_2, checkIfExists: true)
         ]}
-        .set { inputs }
+        .set { fastq_input }
+
+    inputs
+        .bam
+        .map {row -> [
+            row.sample,
+            file(row.bam)
+        ]}
+        .set { bam_input }
 
     genomeDir = file(params.genomeDir, checkIfExists: true, type: 'dir')
 
-    STAR(inputs, genomeDir)
+    STAR(fastq_input, genomeDir)
 
-    arcasHLA(STAR.out)
+    arcasHLA(STAR.out.mix(bam_input))
 
     merge(arcasHLA.out.json.toSortedList())
 }
