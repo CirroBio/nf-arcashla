@@ -103,7 +103,7 @@ workflow {
         .splitCsv(header: true)
         .flatten()
         .branch {
-            fastq: file(it.fastq_1).exists()
+            fastq: !is_null(it.fastq_1)
             bam: true
         }
         .set { inputs }
