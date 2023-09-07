@@ -53,8 +53,8 @@ arcasHLA extract \
 ls -lahtr
 
 for NUM in 1 2; do
-    if [ ! -s "hla/${bam.replaceAll(/.bam/, '')}.extracted.\$NUM.fq.gz" ]; then
-        gzip "hla/${bam.replaceAll(/.bam/, '')}.extracted.\$NUM.fq"
+    if [ ! -s "hla/${bam.name.replaceAll(/.bam/, '')}.extracted.\$NUM.fq.gz" ]; then
+        gzip "hla/${bam.name.replaceAll(/.bam/, '')}.extracted.\$NUM.fq"
     fi
 done
 
