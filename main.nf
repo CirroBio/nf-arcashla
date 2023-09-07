@@ -74,7 +74,7 @@ arcasHLA genotype \
     --verbose \
     --temp tmp \
     --log "hla/${sample}.log" \
-    "hla/${bam.replaceAll(/.bam/, '')}.extracted.1.fq.gz" "hla/${bam.replaceAll(/.bam/, '')}.extracted.2.fq.gz"
+    "hla/${bam.name.replaceAll(/.bam/, '')}.extracted.1.fq.gz" "hla/${bam.name.replaceAll(/.bam/, '')}.extracted.2.fq.gz"
 """
 }
 
