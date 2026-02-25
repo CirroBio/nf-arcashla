@@ -29,16 +29,16 @@ STAR --genomeDir ${genomeDir} \
     """
 }
 
-process arcasHLA {
+process arcasHLA_extract {
     container "${params.container__arcashla}"
-    publishDir "${params.outdir}/${sample}", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${sample}", mode: 'copy', overwrite: true, pattern: "*.log"
 
     input:
     tuple val(sample), path(bam)
 
     output:
-    path "hla/*.genotype.json", emit: json
-    path "hla/"
+    tuple val(sample), path("hla/*.extracted.1.fq.gz"), path("hla/*.extracted.2.fq.gz"), emit: fq
+    tuple val(sample), path("*.extract.log"), emit: log
 
     """#!/bin/bash
 set -e
@@ -48,7 +48,7 @@ arcasHLA extract \
     --outdir hla \
     --verbose \
     --temp tmp \
-    "${bam}"
+    "${bam}" 2>&1 | tee "${sample}.extract.log"
 
 ls -lahtr
 
@@ -58,12 +58,26 @@ for NUM in 1 2; do
     fi
 done
 
-# Required to install the database
-git lfs install
+"""
+}
 
-# Set up the reference database
-arcasHLA reference --version "${params.database}"
+process arcasHLA_genotype {
+    container "${params.container__arcashla}"
+    publishDir "${params.outdir}/${sample}", mode: 'copy', overwrite: true
 
+    input:
+    tuple val(sample), path(fq1), path(fq2), path(db_tar)
+
+    output:
+    path "hla/*"
+
+    """#!/bin/bash
+set -e
+
+# Unpack the database tar file
+unpack_database.sh ${db_tar}
+
+echo "\$(date) - Running genotype"
 arcasHLA genotype \
     --genes ${params.genes} \
     --population "${params.population}" \
@@ -74,11 +88,11 @@ arcasHLA genotype \
     --verbose \
     --temp tmp \
     --log "hla/${sample}.log" \
-    "hla/${bam.name.replaceAll(/.bam/, '')}.extracted.1.fq.gz" "hla/${bam.name.replaceAll(/.bam/, '')}.extracted.2.fq.gz"
+    "${fq1}" "${fq2}" 2>&1 | tee "${sample}.genotype.log"
 """
 }
 
-process merge {
+process merge_arcasHLA_results {
     container "${params.container__arcashla}"
     publishDir "${params.outdir}/", mode: 'copy', overwrite: true
 
@@ -131,7 +145,15 @@ workflow {
 
     STAR(fastq_input, genomeDir)
 
-    arcasHLA(STAR.out.mix(bam_input))
+    // Get a tar of the reference database
+    imgthla_tar = Channel.fromPath(
+        "${params.database_dir}/v${params.database}-alpha.tar.gz",
+        checkIfExists: true
+    )
 
-    merge(arcasHLA.out.json.toSortedList())
+    arcasHLA_extract(STAR.out.mix(bam_input))
+
+    arcasHLA_genotype(arcasHLA_extract.out.fq.combine(imgthla_tar))
+
+    merge_arcasHLA_results(arcasHLA_genotype.out.flatten().toSortedList())
 }
