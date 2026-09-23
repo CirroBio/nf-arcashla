@@ -89,6 +89,18 @@ arcasHLA genotype \
     --temp tmp \
     --log "hla/${sample}.log" \
     "${fq1}" "${fq2}" 2>&1 | tee "${sample}.genotype.log"
+
+# arcasHLA derives its own output filename stem from the first dot-delimited
+# token of the input fastq name, rather than the full filename -- so samples
+# sharing that token (e.g. "patient.specimen.replicate"-style names from the
+# same patient) collide once merge_arcasHLA_results gathers every sample's
+# outputs into one directory. Rename to the full, actually-unique sample name
+# Nextflow already tracks (same one used for --log above).
+for f in hla/*.genes.json hla/*.genotype.json hla/*.alignment.p; do
+    [ -e "\$f" ] || continue
+    suffix="\${f#*.}"
+    mv "\$f" "hla/${sample}.\${suffix}"
+done
 """
 }
 
