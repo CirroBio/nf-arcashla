@@ -95,11 +95,13 @@ arcasHLA genotype \
 # sharing that token (e.g. "patient.specimen.replicate"-style names from the
 # same patient) collide once merge_arcasHLA_results gathers every sample's
 # outputs into one directory. Rename to the full, actually-unique sample name
-# Nextflow already tracks (same one used for --log above).
+# Nextflow already tracks (same one used for --log above). When the stem already
+# is the sample name the file is left alone: GNU mv fails on a file moved onto itself.
 for f in hla/*.genes.json hla/*.genotype.json hla/*.alignment.p; do
     [ -e "\$f" ] || continue
     suffix="\${f#*.}"
-    mv "\$f" "hla/${sample}.\${suffix}"
+    target="hla/${sample}.\${suffix}"
+    [ "\$f" = "\$target" ] || mv "\$f" "\$target"
 done
 """
 }
